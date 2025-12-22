@@ -35,29 +35,30 @@ const reviews = [
 
 export default function ReviewSection() {
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-8 sm:py-12 md:py-16 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Customer Reviews</h2>
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-6 sm:mb-8 md:mb-12 text-gray-900 dark:text-gray-100">Customer Reviews</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {reviews.map((review) => (
             <div
               key={review.id}
-              className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition"
+              className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md hover:shadow-lg transition"
             >
               <div className="flex items-center mb-3">
                 {[...Array(review.rating)].map((_, i) => (
                   <FiStar
                     key={i}
                     className="text-yellow-400 fill-yellow-400"
-                    size={20}
+                    size={18}
+                    style={{ width: '18px', height: '18px' }}
                   />
                 ))}
               </div>
-              <p className="text-gray-600 mb-4 italic">"{review.comment}"</p>
-              <div className="border-t pt-4">
-                <p className="font-semibold text-sm">{review.name}</p>
-                <p className="text-xs text-gray-500">{review.product}</p>
+              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-4 italic">"{review.comment}"</p>
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <p className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-gray-100">{review.name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{review.product}</p>
               </div>
             </div>
           ))}

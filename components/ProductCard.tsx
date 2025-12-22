@@ -80,17 +80,18 @@ export default function ProductCard({
             style={{ pointerEvents: 'auto' }}
             onClick={(e) => e.preventDefault()}
           >
-            <div className="flex flex-col gap-3 px-4 w-full z-40">
+            <div className="flex flex-col gap-2 sm:gap-3 px-3 sm:px-4 w-full z-40">
               <button
                 onClick={handleAddToCart}
-                className="bg-white text-black py-3 px-4 rounded-lg font-semibold hover:bg-gray-100 transition-all flex items-center justify-center gap-2 w-full shadow-xl transform hover:scale-105"
+                className="bg-white text-black py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg font-semibold hover:bg-gray-100 transition-all flex items-center justify-center gap-2 w-full shadow-xl transform hover:scale-105 text-sm sm:text-base"
               >
-                <FiShoppingCart size={18} />
-                Add to Cart
+                <FiShoppingCart size={16} className="sm:w-[18px] sm:h-[18px]" />
+                <span className="hidden sm:inline">Add to Cart</span>
+                <span className="sm:hidden">Add</span>
               </button>
               <button
                 onClick={handleBuyNow}
-                className="bg-black text-white py-3 px-4 rounded-lg font-semibold hover:bg-gray-800 transition-all w-full shadow-xl transform hover:scale-105"
+                className="bg-black text-white py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg font-semibold hover:bg-gray-800 transition-all w-full shadow-xl transform hover:scale-105 text-sm sm:text-base"
               >
                 Buy Now
               </button>
@@ -99,24 +100,24 @@ export default function ProductCard({
         )}
       </div>
       
-      <div className="p-4 flex flex-col flex-grow text-gray-900 dark:text-gray-100">
+      <div className="p-3 sm:p-4 flex flex-col flex-grow text-gray-900 dark:text-gray-100">
         <Link href={`/products/${slug}`}>
-          <h3 className="font-semibold mb-2 hover:text-gray-600 dark:hover:text-gray-300 transition line-clamp-2 h-14">
+          <h3 className="font-semibold mb-2 hover:text-gray-600 dark:hover:text-gray-300 transition line-clamp-2 h-12 sm:h-14 text-sm sm:text-base">
             {name}
           </h3>
         </Link>
-        <div className="flex items-center space-x-2 mb-1 h-7">
+        <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-1 min-h-[28px] sm:h-7">
           {originalPrice && (
-            <span className="text-gray-400 dark:text-gray-400 line-through text-sm">
+            <span className="text-gray-400 dark:text-gray-400 line-through text-xs sm:text-sm">
               PKR {originalPrice.toLocaleString()}
             </span>
           )}
-          <span className="font-bold text-lg text-gray-900 dark:text-gray-100">
+          <span className="font-bold text-base sm:text-lg text-gray-900 dark:text-gray-100">
             {originalPrice ? 'PKR ' : 'From PKR '}
             {price.toLocaleString()}
           </span>
         </div>
-        <div className="h-5">
+        <div className="h-4 sm:h-5">
           {originalPrice && (
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Unit price / per

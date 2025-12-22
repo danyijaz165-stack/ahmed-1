@@ -86,17 +86,17 @@ export default function HeroSection() {
       {/* Navigation Arrows */}
       <button
         onClick={goToPrevious}
-        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-3 z-10 transition"
+        className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 sm:p-3 z-10 transition"
         aria-label="Previous slide"
       >
-        <FiChevronLeft size={24} />
+        <FiChevronLeft size={20} className="sm:w-6 sm:h-6" />
       </button>
       <button
         onClick={goToNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-3 z-10 transition"
+        className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 sm:p-3 z-10 transition"
         aria-label="Next slide"
       >
-        <FiChevronRight size={24} />
+        <FiChevronRight size={20} className="sm:w-6 sm:h-6" />
       </button>
 
       {/* Dots Indicator */}
