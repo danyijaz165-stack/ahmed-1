@@ -109,72 +109,85 @@ export default function ChatbotWidget() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-40">
+    <>
+      {/* Mobile: Full screen overlay when open */}
       {isOpen && (
-        <div className="mb-3 w-80 sm:w-96 rounded-2xl shadow-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 bg-black text-white">
-            <div>
-              <p className="font-semibold text-sm">Ecolight Support</p>
-              <p className="text-xs text-gray-200">Online • We're here to help</p>
-            </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="p-1 rounded-full hover:bg-white/10"
-              aria-label="Close chat"
-            >
-              <FiX size={16} />
-            </button>
-          </div>
-
-          <div className="max-h-72 overflow-y-auto px-4 py-3 space-y-2 bg-gray-50 dark:bg-gray-800">
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex ${
-                  msg.from === 'user' ? 'justify-end' : 'justify-start'
-                }`}
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+      
+      <div className="fixed bottom-4 right-4 z-50 md:z-40">
+        {isOpen && (
+          <div className="mb-3 w-[calc(100vw-2rem)] sm:w-80 md:w-96 h-[calc(100vh-8rem)] sm:h-auto sm:max-h-[600px] md:max-h-[500px] flex flex-col rounded-2xl sm:rounded-2xl shadow-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div className="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3 bg-black text-white flex-shrink-0">
+              <div>
+                <p className="font-semibold text-sm sm:text-base">Ecolight Support</p>
+                <p className="text-xs text-gray-200">Online • We're here to help</p>
+              </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-1.5 sm:p-1 rounded-full hover:bg-white/10 transition"
+                aria-label="Close chat"
               >
+                <FiX size={18} className="sm:w-4 sm:h-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-3 sm:py-4 space-y-2 sm:space-y-3 bg-gray-50 dark:bg-gray-800">
+              {messages.map((msg) => (
                 <div
-                  className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
-                    msg.from === 'user'
-                      ? 'bg-black text-white rounded-br-none'
-                      : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-bl-none border border-gray-200 dark:border-gray-600'
+                  key={msg.id}
+                  className={`flex ${
+                    msg.from === 'user' ? 'justify-end' : 'justify-start'
                   }`}
                 >
-                  {msg.text}
+                  <div
+                    className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm break-words ${
+                      msg.from === 'user'
+                        ? 'bg-black text-white rounded-br-none'
+                        : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-bl-none border border-gray-200 dark:border-gray-600'
+                    }`}
+                  >
+                    <p className="whitespace-pre-line">{msg.text}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          <form onSubmit={handleSend} className="flex items-center border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your message..."
-              className="flex-1 bg-transparent text-sm px-2 py-1 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400"
-            />
-            <button
-              type="submit"
-              className="ml-1 p-2 rounded-full bg-black text-white hover:bg-gray-800 transition"
-              aria-label="Send message"
+            <form 
+              onSubmit={handleSend} 
+              className="flex items-center border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 sm:px-3 py-2 sm:py-2.5 flex-shrink-0"
             >
-              <FiSend size={16} />
-            </button>
-          </form>
-        </div>
-      )}
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Type your message..."
+                className="flex-1 bg-transparent text-sm sm:text-base px-2 sm:px-3 py-1.5 sm:py-2 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400"
+              />
+              <button
+                type="submit"
+                className="ml-1 sm:ml-2 p-2 sm:p-2.5 rounded-full bg-black text-white hover:bg-gray-800 transition flex-shrink-0"
+                aria-label="Send message"
+              >
+                <FiSend size={16} className="sm:w-4 sm:h-4" />
+              </button>
+            </form>
+          </div>
+        )}
 
-      <button
-        onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-2 px-4 py-2 rounded-full shadow-xl bg-black text-white hover:bg-gray-800 transition"
-        aria-label="Open chat"
-      >
-        <FiMessageCircle size={20} />
-        <span className="hidden sm:inline text-sm font-medium">Chat with us</span>
-      </button>
-    </div>
+        <button
+          onClick={() => setIsOpen((prev) => !prev)}
+          className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full shadow-xl bg-black text-white hover:bg-gray-800 transition"
+          aria-label="Open chat"
+        >
+          <FiMessageCircle size={18} className="sm:w-5 sm:h-5" />
+          <span className="hidden sm:inline text-sm font-medium">Chat with us</span>
+        </button>
+      </div>
+    </>
   )
 }
 
