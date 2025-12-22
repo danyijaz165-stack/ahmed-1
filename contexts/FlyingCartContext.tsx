@@ -34,6 +34,12 @@ export function FlyingCartProvider({ children }: { children: ReactNode }) {
     animation.style.opacity = '1'
     animation.style.backgroundColor = '#f3f4f6'
     animation.style.border = '2px solid #fff'
+    animation.style.display = 'flex'
+    animation.style.alignItems = 'center'
+    animation.style.justifyContent = 'center'
+
+    // Add to DOM immediately so it's visible
+    document.body.appendChild(animation)
 
     const img = document.createElement('img')
     img.src = image
@@ -41,15 +47,19 @@ export function FlyingCartProvider({ children }: { children: ReactNode }) {
     img.style.height = '100%'
     img.style.objectFit = 'cover'
     img.style.display = 'block'
-    img.crossOrigin = 'anonymous'
+    img.style.borderRadius = '10px'
     
-    // Handle image load
-    img.onload = () => {
+    // Preload image
+    const preloadImg = new Image()
+    preloadImg.src = image
+    
+    const startAnimation = () => {
+      // Add image to animation div
+      animation.innerHTML = ''
       animation.appendChild(img)
-      document.body.appendChild(animation)
-
-      // Animate to cart after image loads
-      requestAnimationFrame(() => {
+      
+      // Small delay to ensure image is rendered
+      setTimeout(() => {
         const finalX = toRect.left + toRect.width / 2
         const finalY = toRect.top + toRect.height / 2
         
@@ -58,11 +68,16 @@ export function FlyingCartProvider({ children }: { children: ReactNode }) {
         animation.style.top = `${finalY}px`
         animation.style.transform = 'translate(-50%, -50%) scale(0.3)'
         animation.style.opacity = '0.8'
-      })
+      }, 50)
     }
 
-    img.onerror = () => {
-      // If image fails to load, still show animation with a placeholder
+    // Handle image load
+    preloadImg.onload = () => {
+      startAnimation()
+    }
+
+    preloadImg.onerror = () => {
+      // If image fails to load, show placeholder
       const placeholder = document.createElement('div')
       placeholder.style.width = '100%'
       placeholder.style.height = '100%'
@@ -70,12 +85,12 @@ export function FlyingCartProvider({ children }: { children: ReactNode }) {
       placeholder.style.display = 'flex'
       placeholder.style.alignItems = 'center'
       placeholder.style.justifyContent = 'center'
-      placeholder.style.fontSize = '24px'
+      placeholder.style.fontSize = '32px'
       placeholder.textContent = '📦'
+      animation.innerHTML = ''
       animation.appendChild(placeholder)
-      document.body.appendChild(animation)
-
-      requestAnimationFrame(() => {
+      
+      setTimeout(() => {
         const finalX = toRect.left + toRect.width / 2
         const finalY = toRect.top + toRect.height / 2
         
@@ -84,24 +99,12 @@ export function FlyingCartProvider({ children }: { children: ReactNode }) {
         animation.style.top = `${finalY}px`
         animation.style.transform = 'translate(-50%, -50%) scale(0.3)'
         animation.style.opacity = '0.8'
-      })
+      }, 50)
     }
 
-    // Fallback: if image is already cached, it might not trigger onload
-    if (img.complete) {
-      animation.appendChild(img)
-      document.body.appendChild(animation)
-
-      requestAnimationFrame(() => {
-        const finalX = toRect.left + toRect.width / 2
-        const finalY = toRect.top + toRect.height / 2
-        
-        animation.style.transition = 'all 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55)'
-        animation.style.left = `${finalX}px`
-        animation.style.top = `${finalY}px`
-        animation.style.transform = 'translate(-50%, -50%) scale(0.3)'
-        animation.style.opacity = '0.8'
-      })
+    // If image is already cached
+    if (preloadImg.complete) {
+      startAnimation()
     }
 
     // Cleanup
