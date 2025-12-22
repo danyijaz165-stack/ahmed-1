@@ -23,43 +23,93 @@ export function FlyingCartProvider({ children }: { children: ReactNode }) {
     animation.style.position = 'fixed'
     animation.style.left = `${fromRect.left + fromRect.width / 2}px`
     animation.style.top = `${fromRect.top + fromRect.height / 2}px`
-    animation.style.width = '60px'
-    animation.style.height = '60px'
+    animation.style.width = '80px'
+    animation.style.height = '80px'
     animation.style.zIndex = '99999'
     animation.style.pointerEvents = 'none'
-    animation.style.borderRadius = '8px'
+    animation.style.borderRadius = '12px'
     animation.style.overflow = 'hidden'
-    animation.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.4)'
+    animation.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.5)'
     animation.style.transform = 'translate(-50%, -50%) scale(1)'
     animation.style.opacity = '1'
+    animation.style.backgroundColor = '#f3f4f6'
+    animation.style.border = '2px solid #fff'
 
     const img = document.createElement('img')
     img.src = image
     img.style.width = '100%'
     img.style.height = '100%'
     img.style.objectFit = 'cover'
-    animation.appendChild(img)
+    img.style.display = 'block'
+    img.crossOrigin = 'anonymous'
+    
+    // Handle image load
+    img.onload = () => {
+      animation.appendChild(img)
+      document.body.appendChild(animation)
 
-    document.body.appendChild(animation)
+      // Animate to cart after image loads
+      requestAnimationFrame(() => {
+        const finalX = toRect.left + toRect.width / 2
+        const finalY = toRect.top + toRect.height / 2
+        
+        animation.style.transition = 'all 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+        animation.style.left = `${finalX}px`
+        animation.style.top = `${finalY}px`
+        animation.style.transform = 'translate(-50%, -50%) scale(0.3)'
+        animation.style.opacity = '0.8'
+      })
+    }
 
-    // Animate to cart
-    requestAnimationFrame(() => {
-      const finalX = toRect.left + toRect.width / 2
-      const finalY = toRect.top + toRect.height / 2
-      
-      animation.style.transition = 'all 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55)'
-      animation.style.left = `${finalX}px`
-      animation.style.top = `${finalY}px`
-      animation.style.transform = 'translate(-50%, -50%) scale(0.2)'
-      animation.style.opacity = '0.6'
-    })
+    img.onerror = () => {
+      // If image fails to load, still show animation with a placeholder
+      const placeholder = document.createElement('div')
+      placeholder.style.width = '100%'
+      placeholder.style.height = '100%'
+      placeholder.style.backgroundColor = '#e5e7eb'
+      placeholder.style.display = 'flex'
+      placeholder.style.alignItems = 'center'
+      placeholder.style.justifyContent = 'center'
+      placeholder.style.fontSize = '24px'
+      placeholder.textContent = '📦'
+      animation.appendChild(placeholder)
+      document.body.appendChild(animation)
+
+      requestAnimationFrame(() => {
+        const finalX = toRect.left + toRect.width / 2
+        const finalY = toRect.top + toRect.height / 2
+        
+        animation.style.transition = 'all 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+        animation.style.left = `${finalX}px`
+        animation.style.top = `${finalY}px`
+        animation.style.transform = 'translate(-50%, -50%) scale(0.3)'
+        animation.style.opacity = '0.8'
+      })
+    }
+
+    // Fallback: if image is already cached, it might not trigger onload
+    if (img.complete) {
+      animation.appendChild(img)
+      document.body.appendChild(animation)
+
+      requestAnimationFrame(() => {
+        const finalX = toRect.left + toRect.width / 2
+        const finalY = toRect.top + toRect.height / 2
+        
+        animation.style.transition = 'all 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+        animation.style.left = `${finalX}px`
+        animation.style.top = `${finalY}px`
+        animation.style.transform = 'translate(-50%, -50%) scale(0.3)'
+        animation.style.opacity = '0.8'
+      })
+    }
 
     // Cleanup
     setTimeout(() => {
       if (document.body.contains(animation)) {
         document.body.removeChild(animation)
       }
-    }, 700)
+    }, 800)
   }
 
   return (
