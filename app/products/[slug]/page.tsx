@@ -27,7 +27,7 @@ export default function ProductPage({ params }: ProductPageProps) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
       <AnnouncementBar />
       <Header />
       
@@ -35,7 +35,7 @@ export default function ProductPage({ params }: ProductPageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {/* Product Images */}
-            <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
+            <div className="relative aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
               <Image
                 src={product.image}
                 alt={product.name}
@@ -48,15 +48,15 @@ export default function ProductPage({ params }: ProductPageProps) {
 
             {/* Product Info */}
             <div>
-              <h1 className="text-4xl font-bold mb-4">{product.name}</h1>
+              <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-gray-100">{product.name}</h1>
               
               <div className="mb-6">
                 {product.originalPrice && (
                   <div className="flex items-center space-x-4 mb-2">
-                    <span className="text-2xl font-bold">
+                    <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                       PKR {product.price.toLocaleString()}
                     </span>
-                    <span className="text-xl text-gray-400 line-through">
+                    <span className="text-xl text-gray-400 dark:text-gray-500 line-through">
                       PKR {product.originalPrice.toLocaleString()}
                     </span>
                     {product.onSale && (
@@ -67,21 +67,21 @@ export default function ProductPage({ params }: ProductPageProps) {
                   </div>
                 )}
                 {!product.originalPrice && (
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                     From PKR {product.price.toLocaleString()}
                   </div>
                 )}
-                <p className="text-sm text-gray-500">Unit price / per</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Unit price / per</p>
               </div>
 
               {product.description && (
-                <p className="text-gray-600 mb-6">{product.description}</p>
+                <p className="text-gray-600 dark:text-gray-300 mb-6">{product.description}</p>
               )}
 
               <div className="mb-6">
                 <Link
                   href="/pages/shipping-policy"
-                  className="text-sm text-blue-600 hover:underline"
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
                 >
                   Shipping
                 </Link>

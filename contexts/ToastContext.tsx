@@ -16,24 +16,48 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined)
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([])
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    if (!message) return
+    
+    console.log('🔔 Toast called:', { message, type })
+    
     const id = Math.random().toString(36).substring(7)
-    setToasts((prev) => [...prev, { id, message, type }])
+    const newToast: Toast = { id, message, type }
+    
+    setToasts((prev) => {
+      console.log('📝 Adding toast to state:', { id, message, type, totalToasts: prev.length + 1 })
+      // Remove any existing toasts to prevent stacking
+      return [newToast]
+    })
 
+    // Auto remove after 1 second
     setTimeout(() => {
       setToasts((prev) => prev.filter((toast) => toast.id !== id))
-    }, 2000)
+    }, 1000)
   }
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed top-20 right-4 z-[100] flex flex-col gap-2">
-        {toasts.map((toast) => (
-          <ToastNotification key={toast.id} toast={toast} />
-        ))}
-      </div>
+      {mounted && typeof window !== 'undefined' && (
+        <div 
+          className="fixed top-1/2 right-4 -translate-y-1/2 z-[100] flex flex-col gap-3 pointer-events-none"
+          style={{
+            maxWidth: 'calc(100vw - 2rem)',
+          }}
+        >
+          {toasts.map((toast) => {
+            console.log('🎨 Rendering toast:', toast.message, toast.type)
+            return <ToastNotification key={toast.id} toast={toast} />
+          })}
+        </div>
+      )}
     </ToastContext.Provider>
   )
 }
@@ -42,45 +66,43 @@ function ToastNotification({ toast }: { toast: Toast }) {
   const [isVisible, setIsVisible] = useState(true)
 
   useEffect(() => {
+    setIsVisible(true)
     const timer = setTimeout(() => {
       setIsVisible(false)
-    }, 2000)
+    }, 1000)
 
     return () => clearTimeout(timer)
-  }, [])
+  }, [toast.id])
 
   const bgColor = {
-    success: 'bg-gradient-to-r from-green-500 to-green-600',
-    error: 'bg-gradient-to-r from-red-500 to-red-600',
-    info: 'bg-gradient-to-r from-blue-500 to-blue-600',
+    success: '#22c55e', // green-500
+    error: '#ef4444', // red-500
+    info: '#3b82f6', // blue-500
   }[toast.type || 'success']
 
   if (!isVisible) return null
 
   return (
     <div
-      className={`${bgColor} text-white px-6 py-4 rounded-xl shadow-2xl backdrop-blur-md border border-white/20 animate-slide-in-right flex items-center gap-3 min-w-[320px] max-w-[400px] relative overflow-hidden`}
+      className="text-white px-6 py-4 rounded-md shadow-xl animate-slide-in-right flex items-center justify-between min-w-[320px] max-w-[420px] relative overflow-hidden pointer-events-auto z-[10000]"
+      style={{ 
+        backgroundColor: bgColor,
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+      }}
     >
-      {/* Animated background effect */}
-      <div className="absolute inset-0 bg-white/10 animate-pulse"></div>
-      
-      {/* Checkmark icon for success */}
-      {toast.type === 'success' && (
-        <div className="relative z-10 flex-shrink-0 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-      )}
-      
-      <div className="flex-1 relative z-10">
-        <p className="font-semibold text-sm">{toast.message}</p>
+      {/* Message */}
+      <div className="flex-1">
+        <p className="font-medium text-base text-white leading-snug">{toast.message}</p>
       </div>
       
-      {/* Progress bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30">
-        <div className="h-full bg-white animate-progress"></div>
-      </div>
+      {/* Close button */}
+      <button
+        onClick={() => setIsVisible(false)}
+        className="ml-4 flex-shrink-0 w-6 h-6 bg-white/25 hover:bg-white/35 rounded-sm flex items-center justify-center transition-all duration-150 cursor-pointer"
+        aria-label="Close"
+      >
+        <span className="text-white text-lg font-light leading-none">×</span>
+      </button>
     </div>
   )
 }

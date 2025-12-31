@@ -81,15 +81,12 @@ export default function Home() {
             </p>
             <Link
               href="/pages/contact"
-              className="inline-block px-6 sm:px-8 py-2 sm:py-3 bg-black text-white hover:bg-gray-800 transition font-semibold rounded-md text-sm sm:text-base"
+              className="inline-block px-6 sm:px-8 py-2 sm:py-3 bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition font-semibold rounded-md text-sm sm:text-base"
             >
               CONTACT US
             </Link>
           </div>
         </section>
-
-        {/* Review Section */}
-        <ReviewSection />
 
         {/* Gentleman's Reserve Collection */}
         <ProductSlider
@@ -97,6 +94,9 @@ export default function Home() {
           products={gentlemanReserve}
           viewAllLink="/collections/gentlemans-reserve"
         />
+
+        {/* Review Section */}
+        <ReviewSection />
 
         {/* All Products Collection */}
         <ProductSlider
@@ -171,15 +171,33 @@ export default function Home() {
         </section>
 
         {/* Promo Section */}
-        <section className="py-8 sm:py-12 bg-black text-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 px-4">SAVE ENERGY, SHINE BRIGHT</h2>
-            <p className="mb-4 sm:mb-6 text-gray-200 text-sm sm:text-base px-4">
+        <section className="relative py-6 sm:py-8 md:py-10 text-white overflow-hidden">
+          {/* Background Image */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{
+              backgroundImage: 'url(https://images.pexels.com/photos/5696121/pexels-photo-5696121.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          >
+            {/* Overlay for better text readability */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/70 to-black/80"></div>
+            {/* Additional overlay for depth */}
+            <div className="absolute inset-0 bg-black/40"></div>
+          </div>
+          
+          {/* Content */}
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 px-4 drop-shadow-lg">
+              SAVE ENERGY, SHINE BRIGHT
+            </h2>
+            <p className="mb-4 sm:mb-5 text-gray-100 text-sm sm:text-base md:text-lg px-4 max-w-2xl mx-auto drop-shadow-md">
               Ecolight LEDs save up to 80% on electricity bills – perfect for homes and businesses.
             </p>
             <Link
               href="/collections/winter"
-              className="inline-block px-6 sm:px-8 py-2 sm:py-3 bg-white text-black hover:bg-gray-200 transition font-semibold rounded-md text-sm sm:text-base"
+              className="inline-block px-6 sm:px-8 py-2 sm:py-3 bg-white text-black hover:bg-gray-100 transition-all duration-300 font-bold rounded-lg text-sm sm:text-base shadow-2xl hover:shadow-white/20 hover:scale-105 transform"
             >
               SHOP NOW
             </Link>

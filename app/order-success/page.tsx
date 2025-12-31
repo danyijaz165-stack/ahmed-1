@@ -7,29 +7,41 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
 import { FiCheckCircle } from 'react-icons/fi'
+import { ordersAPI } from '@/lib/api'
 
 function OrderSuccessContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const orderId = searchParams.get('id')
   const [order, setOrder] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (orderId) {
-      const orders = JSON.parse(localStorage.getItem('orders') || '[]')
-      const foundOrder = orders.find((o: any) => o.id === orderId)
-      setOrder(foundOrder)
+      loadOrder()
     }
   }, [orderId])
 
-  if (!order) {
+  const loadOrder = async () => {
+    try {
+      setLoading(true)
+      const orderData = await ordersAPI.getOrder(orderId!)
+      setOrder(orderData)
+    } catch (error) {
+      console.error('Failed to load order:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading || !order) {
     return (
       <div className="min-h-screen flex flex-col">
         <AnnouncementBar />
         <Header />
         <main className="flex-grow flex items-center justify-center py-12">
           <div className="text-center">
-            <p className="text-gray-600">Loading order details...</p>
+            <p className="text-gray-600 dark:text-gray-400">Loading order details...</p>
           </div>
         </main>
         <Footer />
@@ -86,7 +98,7 @@ function OrderSuccessContent() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/"
-                className="px-6 py-3 bg-black text-white hover:bg-gray-800 transition font-semibold rounded"
+                className="px-6 py-3 bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition font-semibold rounded"
               >
                 Continue Shopping
               </Link>

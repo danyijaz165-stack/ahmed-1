@@ -2,11 +2,13 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { FiShoppingCart } from 'react-icons/fi'
 import { useCart } from '@/contexts/CartContext'
 import { useToast } from '@/contexts/ToastContext'
 import { useFlyingCart } from '@/contexts/FlyingCartContext'
+import { Product } from '@/data/products'
+import BuyNowModal from './BuyNowModal'
 
 interface ProductCardProps {
   id: string
@@ -28,15 +30,61 @@ export default function ProductCard({
   onSale = false,
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false)
+  const [isBuyNowModalOpen, setIsBuyNowModalOpen] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const addToCartButtonRef = useRef<HTMLButtonElement>(null)
   const buyNowButtonRef = useRef<HTMLButtonElement>(null)
   const { addToCart } = useCart()
   const { showToast } = useToast()
   const { triggerAnimation } = useFlyingCart()
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const user = sessionStorage.getItem('user')
+      setIsLoggedIn(!!user)
+      
+      // Listen for login/logout events
+      const handleStorageChange = () => {
+        const user = sessionStorage.getItem('user')
+        setIsLoggedIn(!!user)
+      }
+      
+      window.addEventListener('storage', handleStorageChange)
+      window.addEventListener('login', handleStorageChange)
+      window.addEventListener('logout', handleStorageChange)
+      
+      return () => {
+        window.removeEventListener('storage', handleStorageChange)
+        window.removeEventListener('login', handleStorageChange)
+        window.removeEventListener('logout', handleStorageChange)
+      }
+    }
+  }, [])
+
+  // Create a Product object for the modal
+  const product: Product = {
+    id,
+    name,
+    price,
+    originalPrice,
+    image,
+    slug,
+    onSale,
+    category: 'products', // Default category
+  }
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    
+    // Check if user is logged in
+    if (typeof window !== 'undefined') {
+      const user = sessionStorage.getItem('user')
+      if (!user) {
+        showToast('Login First', 'error')
+        return
+      }
+    }
     
     // Trigger flying animation
     if (addToCartButtonRef.current) {
@@ -44,9 +92,13 @@ export default function ProductCard({
     }
     
     // Small delay before adding to cart for better UX
-    setTimeout(() => {
-      addToCart({ id, name, price, image })
-      showToast(`${name} added to cart!`, 'success')
+    setTimeout(async () => {
+      try {
+        await addToCart({ id, name, price, image })
+        showToast(`${name} added to cart!`, 'success')
+      } catch (error: any) {
+        showToast(error.message || 'Failed to add to cart', 'error')
+      }
     }, 100)
   }
 
@@ -54,19 +106,8 @@ export default function ProductCard({
     e.preventDefault()
     e.stopPropagation()
     
-    // Trigger flying animation
-    if (buyNowButtonRef.current) {
-      triggerAnimation(image, buyNowButtonRef.current)
-    }
-    
-    // Small delay before adding to cart and redirecting
-    setTimeout(() => {
-      addToCart({ id, name, price, image })
-      showToast(`${name} added to cart!`, 'success')
-      setTimeout(() => {
-        window.location.href = '/cart'
-      }, 500)
-    }, 100)
+    // Open the buy now modal directly without animation
+    setIsBuyNowModalOpen(true)
   }
 
   return (
@@ -106,19 +147,21 @@ export default function ProductCard({
             onClick={(e) => e.preventDefault()}
           >
             <div className="flex flex-col gap-2 sm:gap-3 px-3 sm:px-4 w-full z-40">
-              <button
-                ref={addToCartButtonRef}
-                onClick={handleAddToCart}
-                className="bg-white text-black py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg font-semibold hover:bg-gray-100 transition-all flex items-center justify-center gap-2 w-full shadow-xl transform hover:scale-105 text-sm sm:text-base"
-              >
-                <FiShoppingCart size={16} className="sm:w-[18px] sm:h-[18px]" />
-                <span className="hidden sm:inline">Add to Cart</span>
-                <span className="sm:hidden">Add</span>
-              </button>
+              {isLoggedIn && (
+                <button
+                  ref={addToCartButtonRef}
+                  onClick={handleAddToCart}
+                  className="bg-white dark:bg-gray-800 text-black dark:text-white py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-all flex items-center justify-center gap-2 w-full shadow-xl transform hover:scale-105 text-sm sm:text-base"
+                >
+                  <FiShoppingCart size={16} className="sm:w-[18px] sm:h-[18px]" />
+                  <span className="hidden sm:inline">Add to Cart</span>
+                  <span className="sm:hidden">Add</span>
+                </button>
+              )}
               <button
                 ref={buyNowButtonRef}
                 onClick={handleBuyNow}
-                className="bg-black text-white py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg font-semibold hover:bg-gray-800 transition-all w-full shadow-xl transform hover:scale-105 text-sm sm:text-base"
+                className="bg-black dark:bg-white text-white dark:text-black py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg font-semibold hover:bg-gray-800 dark:hover:bg-gray-200 transition-all w-full shadow-xl transform hover:scale-105 text-sm sm:text-base"
               >
                 Buy Now
               </button>
@@ -152,6 +195,13 @@ export default function ProductCard({
           )}
         </div>
       </div>
+
+      <BuyNowModal
+        product={product}
+        quantity={1}
+        isOpen={isBuyNowModalOpen}
+        onClose={() => setIsBuyNowModalOpen(false)}
+      />
     </div>
   )
 }

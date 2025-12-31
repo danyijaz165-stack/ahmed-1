@@ -7,10 +7,12 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
 import { useToast } from '@/contexts/ToastContext'
+import { authAPI } from '@/lib/api'
 
 export default function SignupPage() {
   const router = useRouter()
   const { showToast } = useToast()
+  const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -25,34 +27,83 @@ export default function SignupPage() {
     })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validation
+    if (!formData.name.trim()) {
+      showToast('Please enter your name', 'error')
+      return
+    }
+    
+    if (!formData.email.trim()) {
+      showToast('Please enter your email', 'error')
+      return
+    }
+    
+    if (formData.password.length < 6) {
+      showToast('Password must be at least 6 characters', 'error')
+      return
+    }
     
     if (formData.password !== formData.confirmPassword) {
       showToast('Passwords do not match', 'error')
       return
     }
     
-    const users = JSON.parse(localStorage.getItem('users') || '[]')
-    const existingUser = users.find((u: any) => u.email === formData.email)
+    setLoading(true)
     
-    if (existingUser) {
-      showToast('Email already registered', 'error')
-      return
+    try {
+      const response = await authAPI.signup(
+        formData.name.trim(), 
+        formData.email.trim().toLowerCase(), 
+        formData.password
+      )
+      
+      // Don't store user in sessionStorage after signup
+      // User should login first to see their name in header
+      
+      // Show toast notification first
+      console.log('✅ Signup successful, showing toast...')
+      showToast('Account created successfully! 🎉', 'success')
+      console.log('✅ Toast function called')
+      
+      // Small delay to show toast before redirect
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      // Redirect to login page
+      console.log('🔄 Redirecting to login page...')
+      router.push('/account/login')
+    } catch (error: any) {
+      let errorMessage = error.message || 'Something went wrong. Please try again.'
+      
+      console.log('Signup error caught:', errorMessage)
+      
+      // Specific error messages for better UX
+      if (
+        errorMessage.includes('Email already registered') || 
+        errorMessage.includes('already exists') ||
+        errorMessage.includes('already registered') ||
+        errorMessage.toLowerCase().includes('duplicate')
+      ) {
+        showToast('This email is already registered. Please use a different email or try logging in.', 'error')
+      } else if (errorMessage.includes('Email') && !errorMessage.includes('already')) {
+        showToast('Please enter a valid email address', 'error')
+      } else if (errorMessage.includes('Password')) {
+        showToast('Password must be at least 6 characters', 'error')
+      } else if (
+        errorMessage.includes('connection') || 
+        errorMessage.includes('Network') ||
+        errorMessage.includes('timeout') ||
+        errorMessage.includes('ETIMEOUT')
+      ) {
+        showToast('Database connection timeout. Please check your internet connection and try again.', 'error')
+      } else {
+        showToast(errorMessage, 'error')
+      }
+    } finally {
+      setLoading(false)
     }
-    
-    const newUser = {
-      id: Math.random().toString(36).substring(7),
-      name: formData.name,
-      email: formData.email,
-      password: formData.password,
-    }
-    
-    users.push(newUser)
-    localStorage.setItem('users', JSON.stringify(users))
-    localStorage.setItem('currentUser', JSON.stringify(newUser))
-    showToast('Account created successfully!', 'success')
-    router.push('/')
   }
 
   return (
@@ -124,9 +175,10 @@ export default function SignupPage() {
 
               <button
                 type="submit"
-                className="w-full bg-black text-white py-3 px-6 hover:bg-gray-800 transition font-semibold rounded"
+                disabled={loading}
+                className="w-full bg-black dark:bg-white text-white dark:text-black py-3 px-6 hover:bg-gray-800 dark:hover:bg-gray-200 transition font-semibold rounded disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Sign up
+                {loading ? 'Creating Account...' : 'Sign up'}
               </button>
             </form>
           </div>

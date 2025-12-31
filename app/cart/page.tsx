@@ -24,20 +24,28 @@ export default function CartPage() {
     setLoading(false)
   }, [])
 
-  const updateQuantity = (id: string, quantity: number) => {
+  const updateQuantity = async (id: string, quantity: number) => {
     if (quantity <= 0) {
-      removeItem(id)
+      await removeItem(id)
       return
     }
     const updatedCart = cart.map((item: CartItem) =>
       item.id === id ? { ...item, quantity } : item
     )
-    updateCart(updatedCart)
+    try {
+      await updateCart(updatedCart)
+    } catch (error: any) {
+      console.error('Failed to update cart:', error)
+    }
   }
 
-  const removeItem = (id: string) => {
+  const removeItem = async (id: string) => {
     const updatedCart = cart.filter((item: CartItem) => item.id !== id)
-    updateCart(updatedCart)
+    try {
+      await updateCart(updatedCart)
+    } catch (error: any) {
+      console.error('Failed to remove item:', error)
+    }
   }
 
   const total = cart.reduce((sum: number, item: CartItem) => sum + item.price * item.quantity, 0)
@@ -64,7 +72,7 @@ export default function CartPage() {
               <p className="text-xl mb-4 text-gray-900 dark:text-gray-100">Your cart is empty</p>
               <Link
                 href="/"
-                className="inline-block bg-black dark:bg-gray-800 text-white px-6 py-3 hover:bg-gray-800 dark:hover:bg-gray-700 transition"
+                className="inline-block bg-black dark:bg-white text-white dark:text-black px-6 py-3 hover:bg-gray-800 dark:hover:bg-gray-200 transition"
               >
                 Continue shopping
               </Link>
@@ -141,7 +149,7 @@ export default function CartPage() {
                   </div>
                   <Link
                     href="/checkout"
-                    className="block w-full bg-black dark:bg-gray-800 text-white text-center py-3 hover:bg-gray-800 dark:hover:bg-gray-700 transition font-semibold rounded"
+                    className="block w-full bg-black dark:bg-white text-white dark:text-black text-center py-3 hover:bg-gray-800 dark:hover:bg-gray-200 transition font-semibold rounded"
                   >
                     Check out
                   </Link>

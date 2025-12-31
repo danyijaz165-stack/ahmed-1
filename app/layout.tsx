@@ -19,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="bg-white text-gray-900">
+      <body className="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors">
         <FlyingCartProvider>
           <CartProvider>
             <ToastProvider>

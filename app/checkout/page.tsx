@@ -7,6 +7,7 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { useCart } from '@/contexts/CartContext'
 import { useToast } from '@/contexts/ToastContext'
+import { ordersAPI } from '@/lib/api'
 import Image from 'next/image'
 import { FiCheckCircle } from 'react-icons/fi'
 
@@ -15,7 +16,6 @@ export default function CheckoutPage() {
   const { cart, updateCart } = useCart()
   const { showToast } = useToast()
   const [loading, setLoading] = useState(false)
-  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false)
   const placeOrderButtonRef = useRef<HTMLButtonElement>(null)
   const [formData, setFormData] = useState({
     firstName: '',
@@ -44,66 +44,30 @@ export default function CheckoutPage() {
     e.preventDefault()
     setLoading(true)
 
-    // Simulate order processing
-    setTimeout(() => {
-      // Save order to localStorage
-      const order = {
-        id: Math.random().toString(36).substring(7),
+    try {
+      // Save order to API
+      const orderData = {
         items: cart,
         customer: formData,
         total: finalTotal,
-        date: new Date().toISOString(),
-        status: 'pending',
       }
       
-      const orders = JSON.parse(localStorage.getItem('orders') || '[]')
-      orders.push(order)
-      localStorage.setItem('orders', JSON.stringify(orders))
+      const order = await ordersAPI.createOrder(orderData)
       
       // Clear cart
-      updateCart([])
-      localStorage.removeItem('cart')
+      await updateCart([])
       
       setLoading(false)
       
-      // Show success animation
-      if (placeOrderButtonRef.current) {
-        setShowSuccessAnimation(true)
-        const buttonRect = placeOrderButtonRef.current.getBoundingClientRect()
-        
-        // Create success animation
-        const successIcon = document.createElement('div')
-        successIcon.style.position = 'fixed'
-        successIcon.style.left = `${buttonRect.left + buttonRect.width / 2}px`
-        successIcon.style.top = `${buttonRect.top + buttonRect.height / 2}px`
-        successIcon.style.width = '80px'
-        successIcon.style.height = '80px'
-        successIcon.style.zIndex = '99999'
-        successIcon.style.pointerEvents = 'none'
-        successIcon.style.transform = 'translate(-50%, -50%) scale(0)'
-        successIcon.style.transition = 'all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)'
-        successIcon.style.color = '#10b981'
-        successIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" style="width: 100%; height: 100%;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>'
-        
-        document.body.appendChild(successIcon)
-        
-        // Animate success icon
-        requestAnimationFrame(() => {
-          successIcon.style.transform = 'translate(-50%, -50%) scale(1.5)'
-          successIcon.style.opacity = '1'
-        })
-        
-        // Remove and redirect
-        setTimeout(() => {
-          if (document.body.contains(successIcon)) {
-            document.body.removeChild(successIcon)
-          }
-          router.push(`/order-success?id=${order.id}`)
-        }, 800)
-      } else {
-        router.push(`/order-success?id=${order.id}`)
-      }
-    }, 2000)
+      // Show success toast
+      showToast('Order placed successfully!', 'success')
+      
+      // Redirect immediately to order details page
+      router.push(`/order-success?id=${order.id}`)
+    } catch (error: any) {
+      setLoading(false)
+      showToast(error.message || 'Failed to place order', 'error')
+    }
   }
 
   if (cart.length === 0) {
@@ -116,7 +80,7 @@ export default function CheckoutPage() {
             <h1 className="text-3xl font-bold mb-4 text-gray-900 dark:text-gray-100">Your cart is empty</h1>
             <button
               onClick={() => router.push('/')}
-              className="px-6 py-3 bg-black dark:bg-gray-800 text-white hover:bg-gray-800 dark:hover:bg-gray-700 transition"
+              className="px-6 py-3 bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 transition"
             >
               Continue Shopping
             </button>
@@ -311,7 +275,7 @@ export default function CheckoutPage() {
                   ref={placeOrderButtonRef}
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-black dark:bg-gray-800 text-white py-3 px-6 hover:bg-gray-800 dark:hover:bg-gray-700 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed relative"
+                  className="w-full bg-black dark:bg-white text-white dark:text-black py-3 px-6 hover:bg-gray-800 dark:hover:bg-gray-200 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed relative"
                 >
                   {loading ? 'Processing...' : 'Place Order'}
                 </button>

@@ -15,7 +15,7 @@ export default function NotFound() {
           <h2 className="text-2xl font-semibold mb-4">Page not found</h2>
           <Link
             href="/"
-            className="inline-block bg-black text-white px-6 py-3 hover:bg-gray-800 transition"
+            className="inline-block bg-black dark:bg-white text-white dark:text-black px-6 py-3 hover:bg-gray-800 dark:hover:bg-gray-200 transition"
           >
             Continue shopping
           </Link>

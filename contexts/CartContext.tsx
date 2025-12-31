@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { cartAPI } from '@/lib/api'
 
 interface CartItem {
   id: string
@@ -13,50 +14,74 @@ interface CartItem {
 interface CartContextType {
   cart: CartItem[]
   cartCount: number
-  addToCart: (item: Omit<CartItem, 'quantity'>) => void
-  updateCart: (cart: CartItem[]) => void
+  addToCart: (item: Omit<CartItem, 'quantity'>) => Promise<void>
+  updateCart: (cart: CartItem[]) => Promise<void>
+  clearCart: () => Promise<void>
+  loading: boolean
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([])
+  const [loading, setLoading] = useState(true)
 
+  // Load cart from API on mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedCart = localStorage.getItem('cart')
-      if (savedCart) {
-        setCart(JSON.parse(savedCart))
-      }
-    }
+    loadCart()
   }, [])
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('cart', JSON.stringify(cart))
-    }
-  }, [cart])
-
-  const addToCart = (item: Omit<CartItem, 'quantity'>) => {
-    setCart((prev) => {
-      const existingItem = prev.find((i) => i.id === item.id)
-      if (existingItem) {
-        return prev.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-        )
+  const loadCart = async () => {
+    try {
+      setLoading(true)
+      const cartData = await cartAPI.getCart()
+      setCart(cartData)
+    } catch (error: any) {
+      console.error('Failed to load cart:', error)
+      // If it's a database connection error, show empty cart but log the error
+      if (error.message?.includes('Database connection')) {
+        console.error('MongoDB not configured. Please set MONGODB_URI in .env.local')
       }
-      return [...prev, { ...item, quantity: 1 }]
-    })
+      setCart([])
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const updateCart = (newCart: CartItem[]) => {
-    setCart(newCart)
+  const addToCart = async (item: Omit<CartItem, 'quantity'>) => {
+    try {
+      const updatedCart = await cartAPI.addToCart(item)
+      setCart(updatedCart)
+    } catch (error) {
+      console.error('Failed to add to cart:', error)
+      throw error
+    }
+  }
+
+  const updateCart = async (newCart: CartItem[]) => {
+    try {
+      const updatedCart = await cartAPI.updateCart(newCart)
+      setCart(updatedCart)
+    } catch (error) {
+      console.error('Failed to update cart:', error)
+      throw error
+    }
+  }
+
+  const clearCart = async () => {
+    try {
+      await cartAPI.clearCart()
+      setCart([])
+    } catch (error) {
+      console.error('Failed to clear cart:', error)
+      throw error
+    }
   }
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
 
   return (
-    <CartContext.Provider value={{ cart, cartCount, addToCart, updateCart }}>
+    <CartContext.Provider value={{ cart, cartCount, addToCart, updateCart, clearCart, loading }}>
       {children}
     </CartContext.Provider>
   )

@@ -8,6 +8,11 @@ const nextConfig = {
         hostname: 'scentsationperfume.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.pexels.com',
+        pathname: '/**',
+      },
     ],
     unoptimized: false,
   },
